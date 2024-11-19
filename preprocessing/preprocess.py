@@ -2,9 +2,11 @@
 import pandas as pd
 from io import BytesIO
 from matplotlib.figure import Figure
-from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 import seaborn as sns
+
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
 
 
 class Preprocess():
@@ -42,9 +44,9 @@ class Preprocess():
             return None
 
 
-    def get_dummies(self) -> pd.DataFrame:
+    def get_dummies(self, dataframe: pd.DataFrame) -> pd.DataFrame:
 
-        df: pd.DataFrame = self.opened_file
+        df: pd.DataFrame = dataframe
         categorical_cols = df.select_dtypes(include=["object"]).columns
 
         df_dummies : pd.DataFrame = pd.get_dummies(df, categorical_cols, drop_first=True)
@@ -54,6 +56,31 @@ class Preprocess():
 
         return df_dummies
 
+    def normalize(self, dataframe: pd.DataFrame, exclude_columns: list = None) -> pd.DataFrame:
+
+
+        """
+        Normaliza las columnas numéricas de un DataFrame, excluyendo las columnas especificadas.
+
+        Parameters:
+        - dataframe: pd.DataFrame - DataFrame a normalizar.
+        - exclude_columns: list - Lista de columnas numéricas a excluir de la normalización.
+
+        Returns:
+        - pd.DataFrame: DataFrame con las columnas numéricas normalizadas (excepto las excluidas).
+        """
+
+        numeric_columns = dataframe.select_dtypes(include=['float64', 'int64']).columns
+
+        if exclude_columns is not None:
+            numeric_columns = numeric_columns.difference(exclude_columns)
+
+        # Normalizar solo las columnas seleccionadas
+        dataframe[numeric_columns] = (dataframe[numeric_columns] - dataframe[numeric_columns].mean()) / (
+            dataframe[numeric_columns].std()
+        )
+
+        return dataframe
 
     def distribution(self) -> Figure:
 
@@ -138,10 +165,10 @@ if __name__ == "__main__":
     route: str = "../data/Loan.csv"
     data = Preprocess(route)
     file = data.opened_file
-    # dummies = data.get_dummies()
-    # print(dummies)
-    train, test = train_test_split(file, test_size=0.2, random_state=42)
-    print(train)
-    print(test)
-    print(train.columns)
+    excluded_columns = ['PreviousLoanDefaults', 'PaymentHistory', 'LoanApproved']
+    normal = data.normalize(file, exclude_columns=excluded_columns)
+    print(normal)
+    dummies = data.get_dummies(normal)
+    print(dummies)
+
 

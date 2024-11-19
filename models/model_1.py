@@ -5,6 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from preprocessing.preprocess import Preprocess
+from models.structure import Structure
 
 from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_score, confusion_matrix
 from sklearn.naive_bayes import GaussianNB
@@ -16,12 +17,14 @@ from sklearn.model_selection import RandomizedSearchCV
 
 
 
-class Model_1():
+class Model_1_gausian_nb(Structure):
     def __init__(self):
+
+
         route: str = "../data/Loan.csv"
         data = Preprocess(route)
         self.file: pd.DataFrame = data.opened_file
-        self.df_dummies = data.get_dummies()
+        self.df_dummies = data.get_dummies(self.file)
         self.X = self.df_dummies.drop(columns="LoanApproved")
         self.y = self.df_dummies["LoanApproved"]
 
@@ -29,14 +32,15 @@ class Model_1():
             self.X, self.y, test_size=0.2, random_state=42
         )
 
-    def get_model(self, save_path="../saved_models/saved2/gaussian_nb_best_model.pkl"):
+    def get_model(self, save_path="../saved_models/saved1/gaussian_nb_best_model.pkl"):
 
-        model_path = "../saved_models/saved2/gaussian_nb_best_model.pkl"
+        model_path = "../saved_models/saved1/gaussian_nb_best_model.pkl"
 
         if os.path.exists(model_path):
             with open(model_path, "rb") as file:
                 model = pickle.load(file)
             print("Model loaded successfully!")
+
         else:
             model = GaussianNB()
             cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
@@ -60,7 +64,7 @@ class Model_1():
 
         return model
 
-    def get_hyperparameter(self, save_path="../saved_models/saved2/gaussian_nb_best_model.pkl"):
+    def get_hyperparameter(self, save_path="../saved_models/saved1/gaussian_nb_best_model.pkl"):
         param_distributions = {
             "var_smoothing": [1e-12, 1e-11, 1e-10, 1e-9, 1e-8, 1e-7]
         }
@@ -97,25 +101,22 @@ class Model_1():
         Parameters:
         - model: The trained model (optional, default is None).
         """
-        # If no model is passed, load the default model
+
         if model is None:
             model = self.get_model()
 
-        # Get predicted probabilities
+
         if hasattr(model, "predict_proba"):
-            y_probs = model.predict_proba(self.X_test)[:, 1]  # Get probabilities for the positive class
+            y_probs = model.predict_proba(self.X_test)[:, 1]
         elif hasattr(model, "decision_function"):
-            y_probs = model.decision_function(self.X_test)  # Get decision function scores
+            y_probs = model.decision_function(self.X_test)
         else:
             raise ValueError("Model does not have `predict_proba` or `decision_function`.")
 
-        # Calculate ROC curve
-        fpr, tpr, _ = roc_curve(self.y_test, y_probs)
 
-        # Calculate AUC score
+        fpr, tpr, _ = roc_curve(self.y_test, y_probs)
         roc_auc = auc(fpr, tpr)
 
-        # Plot the ROC curve
         plt.figure()
         plt.plot(fpr, tpr, color="darkorange", lw=2, label=f"ROC Curve (AUC = {roc_auc:.2f})")
         plt.plot([0, 1], [0, 1], color="navy", lw=2, linestyle="--", label="Random Guess")
@@ -127,9 +128,34 @@ class Model_1():
         plt.legend(loc="lower right")
         plt.show()
 
-    def confusion_matrix(self):
-        ...
+    def confusion_matrix_and_metrics(self, model):
+        """
+        Calculate the confusion matrix and performance metrics.
+        Parameters:
+        - model: Trained model to evaluate.
+        Returns:
+        - Dictionary containing accuracy, precision, recall, F1 score, and confusion matrix.
+        """
 
+        y_pred = model.predict(self.X_test)
+        cm = confusion_matrix(self.y_test, y_pred)
+
+        accuracy = accuracy_score(self.y_test, y_pred)
+        precision = precision_score(self.y_test, y_pred, average="binary")
+        recall = recall_score(self.y_test, y_pred, average="binary")
+        f1 = f1_score(self.y_test, y_pred, average="binary")
+
+        print("Confusion Matrix:")
+        ConfusionMatrixDisplay(confusion_matrix=cm).plot(cmap="Blues")
+        plt.show()
+
+        return {
+            "accuracy": accuracy,
+            "precision": precision,
+            "recall": recall,
+            "f1_score": f1,
+            "confusion_matrix": cm,
+        }
 
     def get_prediction(self, data):
 
@@ -140,9 +166,15 @@ class Model_1():
 
 
 if __name__ == "__main__":
-    model = Model_1()
+    model = Model_1_gausian_nb()
     print(model.file)
     trained_model = model.get_model()
     # best = model.get_hyperparameter()
     # print(best)
     model.performance(trained_model)
+    metrics = model.confusion_matrix_and_metrics(trained_model)
+
+    print("Performance Metrics:")
+    for metric, value in metrics.items():
+        if metric != "confusion_matrix":
+            print(f"{metric.capitalize()}: {value:.2f}")
