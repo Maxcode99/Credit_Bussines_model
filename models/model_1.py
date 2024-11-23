@@ -34,6 +34,28 @@ class Model_1_gausian_nb(Structure):
 
     def get_model(self, save_path="../saved_models/saved1/gaussian_nb_best_model.pkl"):
 
+        """
+        Retrieves or trains a Gaussian Naive Bayes model and saves/loads it as needed.
+
+        Parameters
+        ----------
+        save_path : str, optional
+            The file path where the model will be saved or loaded from.
+            Default is "../saved_models/saved1/gaussian_nb_best_model.pkl".
+
+        Returns
+        -------
+        Union[model, Tuple[float, float, model]]
+            If the model already exists at the specified path, the saved model is loaded and returned.
+            If the model does not exist:
+                - Trains a Gaussian Naive Bayes model with cross-validation.
+                - Saves the trained model to the specified path.
+                - Returns a tuple containing:
+                  - The mean training accuracy score (float).
+                  - The mean testing accuracy score (float).
+                  - The trained Gaussian Naive Bayes model.
+        """
+
         model_path = "../saved_models/saved1/gaussian_nb_best_model.pkl"
 
         if os.path.exists(model_path):
@@ -65,6 +87,23 @@ class Model_1_gausian_nb(Structure):
         return model
 
     def get_hyperparameter(self, save_path="../saved_models/saved1/gaussian_nb_best_model.pkl"):
+
+        """
+        Tunes the hyperparameters of a Gaussian Naive Bayes model using RandomizedSearchCV,
+        saves the best model, and returns it.
+
+        Parameters
+        ----------
+        save_path : str, optional
+            The file path where the best model will be saved.
+            Default is "../saved_models/saved1/gaussian_nb_best_model.pkl".
+
+        Returns
+        -------
+        GaussianNB
+            The Gaussian Naive Bayes model with the best hyperparameters obtained from RandomizedSearchCV.
+        """
+
         param_distributions = {
             "var_smoothing": [1e-12, 1e-11, 1e-10, 1e-9, 1e-8, 1e-7]
         }
@@ -95,11 +134,24 @@ class Model_1_gausian_nb(Structure):
         return best_model
 
     def performance(self, model=None):
-        """
-        Plots the AUC-ROC curve for a given model and the test data.
 
-        Parameters:
-        - model: The trained model (optional, default is None).
+        """
+        Evaluates the performance of a model by plotting the ROC curve and calculating the AUC.
+
+        Parameters
+        ----------
+        model : optional
+            The trained model to evaluate. If None, the default model is retrieved using `self.get_model()`.
+
+        Raises
+        ------
+        ValueError
+            If the model does not have `predict_proba` or `decision_function` methods.
+
+        Returns
+        -------
+        None
+            Displays the ROC curve with the AUC score.
         """
 
         if model is None:
@@ -129,12 +181,29 @@ class Model_1_gausian_nb(Structure):
         plt.show()
 
     def confusion_matrix_and_metrics(self, model):
+
         """
-        Calculate the confusion matrix and performance metrics.
-        Parameters:
-        - model: Trained model to evaluate.
-        Returns:
-        - Dictionary containing accuracy, precision, recall, F1 score, and confusion matrix.
+        Calculates and displays the confusion matrix and various performance metrics for a given model.
+
+        Parameters
+        ----------
+        model : estimator
+            The trained model to evaluate.
+
+        Returns
+        -------
+        dict
+            A dictionary containing the following metrics:
+            - "accuracy": The accuracy of the model.
+            - "precision": The precision of the model.
+            - "recall": The recall of the model.
+            - "f1_score": The F1 score of the model.
+            - "confusion_matrix": The confusion matrix.
+
+        Displays
+        --------
+        Confusion Matrix
+            A visual representation of the confusion matrix using matplotlib.
         """
 
         y_pred = model.predict(self.X_test)
@@ -158,6 +227,20 @@ class Model_1_gausian_nb(Structure):
         }
 
     def get_prediction(self, data):
+
+        """
+        Generates predictions for the given input data using the trained model.
+
+        Parameters
+        ----------
+        data : array-like or pd.DataFrame
+            The input data for which predictions are to be generated.
+
+        Returns
+        -------
+        array
+            Predicted labels for the input data.
+        """
 
         model = self.get_model()
         prediction = model.predict(data)

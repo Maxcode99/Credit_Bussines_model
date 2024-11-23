@@ -5,10 +5,6 @@ from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split
-
-
 class Preprocess():
 
     def __init__(self, file: BytesIO):
@@ -45,6 +41,21 @@ class Preprocess():
 
 
     def get_dummies(self, dataframe: pd.DataFrame) -> pd.DataFrame:
+
+        """
+        Converts categorical columns in a DataFrame into dummy/indicator variables.
+
+        Parameters
+        ----------
+        dataframe : pd.DataFrame
+            The input DataFrame containing categorical columns to be transformed.
+
+        Returns
+        -------
+        pd.DataFrame
+            A DataFrame with categorical columns converted to dummy variables. Boolean columns
+            are also converted to integers (0 or 1).
+        """
 
         df: pd.DataFrame = dataframe
         categorical_cols = df.select_dtypes(include=["object"]).columns
