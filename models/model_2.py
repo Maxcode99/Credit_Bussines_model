@@ -196,7 +196,7 @@ class Model_2_forest(Structure):
         plt.ylim([0.0, 1.05])
         plt.xlabel("False Positive Rate")
         plt.ylabel("True Positive Rate")
-        plt.title("Receiver Operating Characteristic (ROC) Curve")
+        plt.title("Receiver Operating Characteristic (ROC) Curve (Random Forest)")
         plt.legend(loc="lower right")
         plt.show()
 
@@ -236,6 +236,7 @@ class Model_2_forest(Structure):
 
         print("Confusion Matrix:")
         ConfusionMatrixDisplay(confusion_matrix=cm).plot(cmap="Blues")
+        plt.title("Random Forest Confusion Matrix")
         plt.show()
 
         return {
@@ -270,13 +271,13 @@ class Model_2_forest(Structure):
 
 if __name__ == "__main__":
     model = Model_2_forest()
-    # trained_model = model.get_model()
-    best = model.get_hyperparameter()
-    print(best)
-    # model.performance(trained_model)
-    # metrics = model.confusion_matrix_and_metrics(trained_model)
-    #
-    # print("Performance Metrics:")
-    # for metric, value in metrics.items():
-    #     if metric != "confusion_matrix":
-    #         print(f"{metric.capitalize()}: {value:.2f}")
+    trained_model = model.get_model()
+    # best = model.get_hyperparameter()
+    # print(best)
+    model.performance(trained_model)
+    metrics = model.confusion_matrix_and_metrics(trained_model)
+
+    print("Performance Metrics:")
+    for metric, value in metrics.items():
+        if metric != "confusion_matrix":
+            print(f"{metric.capitalize()}: {value:.2f}")

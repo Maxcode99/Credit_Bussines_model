@@ -176,7 +176,7 @@ class Model_1_gausian_nb(Structure):
         plt.ylim([0.0, 1.05])
         plt.xlabel("False Positive Rate")
         plt.ylabel("True Positive Rate")
-        plt.title("Receiver Operating Characteristic (ROC) Curve")
+        plt.title("Receiver Operating Characteristic (ROC) Curve (Gaussian Naive Bayes)")
         plt.legend(loc="lower right")
         plt.show()
 
@@ -216,6 +216,7 @@ class Model_1_gausian_nb(Structure):
 
         print("Confusion Matrix:")
         ConfusionMatrixDisplay(confusion_matrix=cm).plot(cmap="Blues")
+        plt.title("Gaussian Naive Bayes Confusion Matrix")
         plt.show()
 
         return {

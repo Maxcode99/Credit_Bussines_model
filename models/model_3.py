@@ -190,7 +190,7 @@ class Model_3_SVM(Structure):
         plt.ylim([0.0, 1.05])
         plt.xlabel("False Positive Rate")
         plt.ylabel("True Positive Rate")
-        plt.title("Receiver Operating Characteristic (ROC) Curve")
+        plt.title("Receiver Operating Characteristic (ROC) Curve (Support Vector Machines)")
         plt.legend(loc="lower right")
         plt.show()
 
@@ -230,6 +230,7 @@ class Model_3_SVM(Structure):
 
         print("Confusion Matrix:")
         ConfusionMatrixDisplay(confusion_matrix=cm).plot(cmap="Blues")
+        plt.title("Support Vector Machines Confusion Matrix")
         plt.show()
 
         return {
