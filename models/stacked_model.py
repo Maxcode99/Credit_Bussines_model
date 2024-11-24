@@ -42,7 +42,6 @@ class Stacked_Models():
         self.df_dummies = data.get_dummies(self.file)
 
         self.X = self.df_dummies.drop(columns="LoanApproved")
-        self.X = data.normalize(self.X)
 
         self.y = self.df_dummies["LoanApproved"]
 
