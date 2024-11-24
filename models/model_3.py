@@ -71,6 +71,7 @@ class Model_3_SVM(Structure):
             with open(model_path, "rb") as file:
                 model = pickle.load(file)
             print("Model loaded successfully!")
+
         else:
             model = SVC(kernel="rbf", C=1.0, gamma="scale", random_state=42)
 
@@ -120,14 +121,13 @@ class Model_3_SVM(Structure):
         """
 
         param_distributions = {
-            'C': [0.01, 0.1, 1],
+            'C': [0.0001, 0.001, 0.01, 0.1, 1, 10],
             'kernel': ['linear', 'rbf'],
-            'gamma': [0.001, 0.01, 'scale'],
+            'gamma': [0.0001, 0.001, 0.01, 0.1, 'scale'],
             'degree': [2, 3],
             'coef0': [0],
-            'max_iter': [1000]
+            'max_iter': [1000, 5000]
         }
-
         svc = SVC()
 
         random_search = RandomizedSearchCV(
@@ -140,7 +140,7 @@ class Model_3_SVM(Structure):
             n_jobs=-1
         )
 
-        random_search.fit(self.X, self.y)
+        random_search.fit(self.X_train, self.y_train)
 
         best_model = random_search.best_estimator_
         print("Best Parameters:", random_search.best_params_)

@@ -32,6 +32,7 @@ class Model_1_gausian_nb(Structure):
             self.X, self.y, test_size=0.2, random_state=42
         )
 
+
     def get_model(self, save_path="../saved_models/saved1/gaussian_nb_best_model.pkl"):
 
         """
@@ -119,7 +120,7 @@ class Model_1_gausian_nb(Structure):
             random_state=42,
             n_jobs=-1,
         )
-        random_search.fit(self.X, self.y)
+        random_search.fit(self.X_train, self.y_train)
 
         best_model = random_search.best_estimator_
         print("Best Parameters:", random_search.best_params_)
@@ -277,14 +278,16 @@ class Model_1_gausian_nb(Structure):
 
 if __name__ == "__main__":
     model = Model_1_gausian_nb()
-    print(model.file)
-    trained_model = model.get_model()
-    # best = model.get_hyperparameter()
-    # print(best)
-    model.performance(trained_model)
-    metrics = model.confusion_matrix_and_metrics(trained_model)
+    # print(model.file)
+    # trained_model = model.get_model()
 
-    print("Performance Metrics:")
-    for metric, value in metrics.items():
-        if metric != "confusion_matrix":
-            print(f"{metric.capitalize()}: {value}")
+    # model.performance(trained_model)
+    # metrics = model.confusion_matrix_and_metrics(trained_model)
+    #
+    # print("Performance Metrics:")
+    # for metric, value in metrics.items():
+    #     if metric != "confusion_matrix":
+    #         print(f"{metric.capitalize()}: {value}")
+
+    best = model.get_hyperparameter()
+    print(best)
