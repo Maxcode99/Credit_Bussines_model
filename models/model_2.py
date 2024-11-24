@@ -297,16 +297,16 @@ class Model_2_forest(Structure):
 
 if __name__ == "__main__":
     model = Model_2_forest()
-    # trained_model = model.get_model()
-    #
-    # model.performance(trained_model)
-    # metrics = model.confusion_matrix_and_metrics(trained_model)
-    #
-    # print("Performance Metrics:")
-    # for metric, value in metrics.items():
-    #     if metric != "confusion_matrix":
-    #         print(f"{metric.capitalize()}: {value}")
+    trained_model = model.get_model()
+
+    model.performance(trained_model)
+    metrics = model.confusion_matrix_and_metrics(trained_model)
+
+    print("Performance Metrics:")
+    for metric, value in metrics.items():
+        if metric != "confusion_matrix":
+            print(f"{metric.capitalize()}: {value}")
 
 
-    best = model.get_hyperparameter()
-    print(best)
+    # best = model.get_hyperparameter()
+    # print(best)

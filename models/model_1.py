@@ -278,16 +278,16 @@ class Model_1_gausian_nb(Structure):
 
 if __name__ == "__main__":
     model = Model_1_gausian_nb()
-    # print(model.file)
-    # trained_model = model.get_model()
+    print(model.file)
+    trained_model = model.get_model()
 
-    # model.performance(trained_model)
-    # metrics = model.confusion_matrix_and_metrics(trained_model)
-    #
-    # print("Performance Metrics:")
-    # for metric, value in metrics.items():
-    #     if metric != "confusion_matrix":
-    #         print(f"{metric.capitalize()}: {value}")
+    model.performance(trained_model)
+    metrics = model.confusion_matrix_and_metrics(trained_model)
 
-    best = model.get_hyperparameter()
-    print(best)
+    print("Performance Metrics:")
+    for metric, value in metrics.items():
+        if metric != "confusion_matrix":
+            print(f"{metric.capitalize()}: {value}")
+
+    # best = model.get_hyperparameter()
+    # print(best)
