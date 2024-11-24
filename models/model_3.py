@@ -20,18 +20,26 @@ from sklearn.svm import SVC
 class Model_3_SVM(Structure):
     def __init__(self):
 
-        self.excluded_columns = ['PreviousLoanDefaults', 'PaymentHistory', 'LoanApproved']
         route: str = "../data/Loan.csv"
         data = Preprocess(route)
+
+        # excluded_variables = ['BankruptcyHistory', 'PreviousLoanDefaults', 'LoanApproved']
+
         self.file: pd.DataFrame = data.opened_file
-        self.standard: pd.DataFrame = data.normalize(self.file, exclude_columns=self.excluded_columns)
-        self.df_dummies = data.get_dummies(self.standard)
+        self.df_dummies = data.get_dummies(self.file)
+
         self.X = self.df_dummies.drop(columns="LoanApproved")
+        self.X = data.normalize(self.X)
+
         self.y = self.df_dummies["LoanApproved"]
 
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
             self.X, self.y, test_size=0.2, random_state=42
         )
+
+
+
+
 
     def get_model(self, save_path="../saved_models/saved3/svm_model.pkl"):
 
@@ -111,14 +119,13 @@ class Model_3_SVM(Structure):
             The SVM model with the best hyperparameters obtained from RandomizedSearchCV.
         """
 
-        # Define hyperparameter search space
         param_distributions = {
-            'C': [0.1, 1, 10, 100, 1000],
-            'kernel': ['linear', 'poly', 'rbf', 'sigmoid'],
-            'gamma': ['scale', 'auto', 0.01, 0.1, 1],
-            'degree': [2, 3, 4, 5],  # Relevant for 'poly'
-            'coef0': [-1, 0, 1],  # Relevant for 'poly' and 'sigmoid'
-            'max_iter': [100, 1000, 10000]
+            'C': [0.01, 0.1, 1],
+            'kernel': ['linear', 'rbf'],
+            'gamma': [0.001, 0.01, 'scale'],
+            'degree': [2, 3],
+            'coef0': [0],
+            'max_iter': [1000]
         }
 
         svc = SVC()
@@ -171,7 +178,7 @@ class Model_3_SVM(Structure):
         if model is None:
             model = self.get_model()
 
-        # Get predicted probabilities
+
         if hasattr(model, "predict_proba"):
             y_probs = model.predict_proba(self.X_test)[:, 1]
         elif hasattr(model, "decision_function"):
@@ -220,25 +227,52 @@ class Model_3_SVM(Structure):
             A visual representation of the confusion matrix using matplotlib.
         """
 
-        y_pred = model.predict(self.X_test)
-        cm = confusion_matrix(self.y_test, y_pred)
 
-        accuracy = accuracy_score(self.y_test, y_pred)
-        precision = precision_score(self.y_test, y_pred, average="binary")
-        recall = recall_score(self.y_test, y_pred, average="binary")
-        f1 = f1_score(self.y_test, y_pred, average="binary")
+        y_pred_test = model.predict(self.X_test)
+        cm_test = confusion_matrix(self.y_test, y_pred_test)
 
-        print("Confusion Matrix:")
-        ConfusionMatrixDisplay(confusion_matrix=cm).plot(cmap="Blues")
-        plt.title("Support Vector Machines Confusion Matrix")
+
+        accuracy_test = accuracy_score(self.y_test, y_pred_test)
+        precision_test = precision_score(self.y_test, y_pred_test, average="binary")
+        recall_test = recall_score(self.y_test, y_pred_test, average="binary")
+        f1_test = f1_score(self.y_test, y_pred_test, average="binary")
+
+
+        y_pred_train = model.predict(self.X_train)
+        cm_train = confusion_matrix(self.y_train, y_pred_train)
+
+
+        accuracy_train = accuracy_score(self.y_train, y_pred_train)
+        precision_train = precision_score(self.y_train, y_pred_train, average="binary")
+        recall_train = recall_score(self.y_train, y_pred_train, average="binary")
+        f1_train = f1_score(self.y_train, y_pred_train, average="binary")
+
+        print("Confusion Matrix - Train:")
+        ConfusionMatrixDisplay(confusion_matrix=cm_train).plot(cmap="Greens")
+        plt.title("Confusion Matrix - Train")
         plt.show()
 
+        print("Confusion Matrix - Test:")
+        ConfusionMatrixDisplay(confusion_matrix=cm_test).plot(cmap="Blues")
+        plt.title("Confusion Matrix - Test")
+        plt.show()
+
+
         return {
-            "accuracy": accuracy,
-            "precision": precision,
-            "recall": recall,
-            "f1_score": f1,
-            "confusion_matrix": cm,
+            "train_metrics": {
+                "accuracy": accuracy_train,
+                "precision": precision_train,
+                "recall": recall_train,
+                "f1_score": f1_train,
+                "confusion_matrix": cm_train,
+            },
+            "test_metrics": {
+                "accuracy": accuracy_test,
+                "precision": precision_test,
+                "recall": recall_test,
+                "f1_score": f1_test,
+                "confusion_matrix": cm_test,
+            },
         }
 
     def get_prediction(self, data):
@@ -266,12 +300,16 @@ class Model_3_SVM(Structure):
 if __name__ == "__main__":
     model = Model_3_SVM()
     trained_model = model.get_model()
-    # best = model.get_hyperparameter()
-    # print(best)
+
     model.performance(trained_model)
     metrics = model.confusion_matrix_and_metrics(trained_model)
 
     print("Performance Metrics:")
     for metric, value in metrics.items():
         if metric != "confusion_matrix":
-            print(f"{metric.capitalize()}: {value:.2f}")
+            print(f"{metric.capitalize()}: {value}")
+
+    # best = model.get_hyperparameter()
+    # print(best)
+
+

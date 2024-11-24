@@ -18,27 +18,19 @@ class Preprocess():
         :param file_path: Path to the file to be loaded
         :return: DataFrame if successfully loaded, otherwise None
         """
-        if file_path.endswith(".xlsx"):
-            try:
-                return pd.read_excel(file_path, engine='openpyxl')
-            except Exception as e:
-                print(f"Error loading .xlsx file {file_path}: {e}")
-
-        elif file_path.endswith(".xls"):
-            try:
-                return pd.read_excel(file_path, engine='xlrd')
-            except Exception as e:
-                print(f"Error loading .xls file {file_path}: {e}")
-
-        elif file_path.endswith(".csv"):
-            try:
+        try:
+            if file_path.endswith(".xlsx"):
+                return pd.read_excel(file_path, engine="openpyxl")
+            elif file_path.endswith(".xls"):
+                return pd.read_excel(file_path, engine="xlrd")
+            elif file_path.endswith(".csv"):
                 return pd.read_csv(file_path)
-            except Exception as e:
-                print(f"Error loading CSV file {file_path}: {e}")
-        else:
-            print(f"Unsupported file type for {file_path}. Skipping.")
+            else:
+                print(f"Unsupported file type for {file_path}.")
+                return None
+        except Exception as e:
+            print(f"Error loading file {file_path}: {e}")
             return None
-
 
     def get_dummies(self, dataframe: pd.DataFrame) -> pd.DataFrame:
 
@@ -57,7 +49,7 @@ class Preprocess():
             are also converted to integers (0 or 1).
         """
 
-        df: pd.DataFrame = dataframe
+        df: pd.DataFrame = dataframe.copy()
         categorical_cols = df.select_dtypes(include=["object"]).columns
 
         df_dummies : pd.DataFrame = pd.get_dummies(df, categorical_cols, drop_first=True)
@@ -80,6 +72,8 @@ class Preprocess():
         Returns:
         - pd.DataFrame: DataFrame con las columnas numéricas normalizadas (excepto las excluidas).
         """
+
+        dataframe = dataframe.copy()
 
         numeric_columns = dataframe.select_dtypes(include=['float64', 'int64']).columns
 

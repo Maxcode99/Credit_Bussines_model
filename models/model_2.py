@@ -64,7 +64,7 @@ class Model_2_forest(Structure):
         else:
             model = RandomForestClassifier(
                 n_estimators=100,
-                max_depth=None,
+                max_depth=4,
                 random_state=42,
                 n_jobs=-1
             )
@@ -88,7 +88,6 @@ class Model_2_forest(Structure):
 
             os.makedirs(os.path.dirname(save_path), exist_ok=True)
 
-            # Save the trained model
             with open(model_path, "wb") as file:
                 pickle.dump(model, file)
             print(f"Model saved successfully at {model_path}!")
@@ -117,7 +116,7 @@ class Model_2_forest(Structure):
 
         param_distributions = {
             'n_estimators': [50, 100, 200, 300, 400, 500],
-            'max_depth': [10, 20, 30, None],
+            'max_depth': [1, 2, 3, 4],
             'min_samples_split': [2, 5, 10],
             'min_samples_leaf': [1, 2, 4],
             'max_features': ['sqrt', 'log2', None],
@@ -226,25 +225,52 @@ class Model_2_forest(Structure):
             A visual representation of the confusion matrix using matplotlib.
         """
 
-        y_pred = model.predict(self.X_test)
-        cm = confusion_matrix(self.y_test, y_pred)
 
-        accuracy = accuracy_score(self.y_test, y_pred)
-        precision = precision_score(self.y_test, y_pred, average="binary")
-        recall = recall_score(self.y_test, y_pred, average="binary")
-        f1 = f1_score(self.y_test, y_pred, average="binary")
+        y_pred_test = model.predict(self.X_test)
+        cm_test = confusion_matrix(self.y_test, y_pred_test)
 
-        print("Confusion Matrix:")
-        ConfusionMatrixDisplay(confusion_matrix=cm).plot(cmap="Blues")
-        plt.title("Random Forest Confusion Matrix")
+
+        accuracy_test = accuracy_score(self.y_test, y_pred_test)
+        precision_test = precision_score(self.y_test, y_pred_test, average="binary")
+        recall_test = recall_score(self.y_test, y_pred_test, average="binary")
+        f1_test = f1_score(self.y_test, y_pred_test, average="binary")
+
+
+        y_pred_train = model.predict(self.X_train)
+        cm_train = confusion_matrix(self.y_train, y_pred_train)
+
+
+        accuracy_train = accuracy_score(self.y_train, y_pred_train)
+        precision_train = precision_score(self.y_train, y_pred_train, average="binary")
+        recall_train = recall_score(self.y_train, y_pred_train, average="binary")
+        f1_train = f1_score(self.y_train, y_pred_train, average="binary")
+
+        print("Confusion Matrix - Train:")
+        ConfusionMatrixDisplay(confusion_matrix=cm_train).plot(cmap="Greens")
+        plt.title("Confusion Matrix - Train")
         plt.show()
 
+        print("Confusion Matrix - Test:")
+        ConfusionMatrixDisplay(confusion_matrix=cm_test).plot(cmap="Blues")
+        plt.title("Confusion Matrix - Test")
+        plt.show()
+
+
         return {
-            "accuracy": accuracy,
-            "precision": precision,
-            "recall": recall,
-            "f1_score": f1,
-            "confusion_matrix": cm,
+            "train_metrics": {
+                "accuracy": accuracy_train,
+                "precision": precision_train,
+                "recall": recall_train,
+                "f1_score": f1_train,
+                "confusion_matrix": cm_train,
+            },
+            "test_metrics": {
+                "accuracy": accuracy_test,
+                "precision": precision_test,
+                "recall": recall_test,
+                "f1_score": f1_test,
+                "confusion_matrix": cm_test,
+            },
         }
 
     def get_prediction(self, data):
@@ -272,12 +298,15 @@ class Model_2_forest(Structure):
 if __name__ == "__main__":
     model = Model_2_forest()
     trained_model = model.get_model()
-    # best = model.get_hyperparameter()
-    # print(best)
+
     model.performance(trained_model)
     metrics = model.confusion_matrix_and_metrics(trained_model)
 
     print("Performance Metrics:")
     for metric, value in metrics.items():
         if metric != "confusion_matrix":
-            print(f"{metric.capitalize()}: {value:.2f}")
+            print(f"{metric.capitalize()}: {value}")
+
+
+  # best = model.get_hyperparameter()
+  #   print(best)

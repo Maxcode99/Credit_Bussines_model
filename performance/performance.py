@@ -9,6 +9,7 @@ if __name__ == "__main__":
     for module in modules:
 
         model = module()
+        print("The data that the model used")
         print(model.file)
         trained_model = model.get_model()
         model.performance(trained_model)
@@ -17,5 +18,5 @@ if __name__ == "__main__":
         print("Performance Metrics:")
         for metric, value in metrics.items():
             if metric != "confusion_matrix":
-                print(f"{metric.capitalize()}: {value:.2f}")
+                print(f"{metric.capitalize()}: {value}")
 
